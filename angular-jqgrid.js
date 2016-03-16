@@ -41,8 +41,6 @@ angualr.module('angular-jqgrid').directive('jqGrid', function() {
       var init = function() {
         var gridObj;
 
-        window.console.log(element.children()[0]);
-
         if (scope.dataset === undefined) {
           // Exception process if dataset is empty.
           return gridObj;
@@ -54,7 +52,6 @@ angualr.module('angular-jqgrid').directive('jqGrid', function() {
         options = $.extend(true, options, scope.options);
 
         gridObj = $(element.children()[0]).jqGrid(options);
-        window.console.log(gridObj);
 
         if (scope.callback) {
           scope.callback(gridObj);
@@ -74,12 +71,13 @@ angualr.module('angular-jqgrid').directive('jqGrid', function() {
 
       var onDatasetChanged = function(dataset) {
         if (jqGrid) {
-          jqGrid.setData(dataset);
-          jqGrid.setupGrid();
 
-          return jqGrid.reload();
+          return jqGrid.trigger('reload');
+
         } else {
+
           jqGrid = init();
+
         }
       };
 
