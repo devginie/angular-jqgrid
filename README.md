@@ -29,4 +29,13 @@ angular.module('myapp').controller('MyController', function($scope) {
     colModel : [{ name : 'fieldName1'}, { name : 'fieldName2', align : 'center'}, { name : 'fieldName3', align : 'center'}]
   };
 ```
+
+In your view or template, add the 'jq-grid' directive, making sure to specify both the 'dataset' and 
+'options' attributes, pointing to the scope variables defined above:
+
+```html
+<jq-grid dataset="myData" options="myGridOptions"></jq-grid>
+```
+
+The grid is created in a 'table' element as a child of the 'jq-grid' directive. 
     
