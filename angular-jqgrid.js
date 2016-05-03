@@ -26,7 +26,7 @@
 /* global angular */
 /* global jQuery */
 
-angualr.module('angular-jqgrid').directive('jqGrid', function() {
+angular.module('angular-jqgrid', []).directive('jqGrid', function() {
   return {
     restrict: 'EA',
     template: '<table></table>',
