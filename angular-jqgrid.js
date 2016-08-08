@@ -33,10 +33,12 @@ angular.module('angular-jqgrid', []).directive('jqGrid', function() {
     scope: {
       dataset: '=',
       options: '=',
-      callback: '='
+      callback: '=',
+      pager: '='
     },
     link: function(scope, element, attributes) {
       var jqGrid = null;
+      var height = attributes.height || '100%';
 
       var init = function() {
         var gridObj;
@@ -47,9 +49,12 @@ angular.module('angular-jqgrid', []).directive('jqGrid', function() {
         }
 
         var options = {};
+
         options.data = scope.dataset;
 
         options = $.extend(true, options, scope.options);
+
+        options.height = height;
 
         gridObj = $(element.children()[0]).jqGrid(options);
 
@@ -59,6 +64,15 @@ angular.module('angular-jqgrid', []).directive('jqGrid', function() {
 
         return gridObj;
       };
+
+      //
+      // Events
+      //
+      // Window Resize
+      $(window).on('resize', function() {
+        var parentElement = angular.element(element).parent();
+        jqGrid.setGridWidth(parentElement.width());
+      });
 
       /**
       * Watches
@@ -70,15 +84,17 @@ angular.module('angular-jqgrid', []).directive('jqGrid', function() {
       var unwatchOptions = scope.$watch('options', onOptionsChanged, true);
 
       var onDatasetChanged = function(dataset) {
+        var startDataChanged = new Date().getTime();
         if (jqGrid) {
 
           jqGrid.jqGrid('clearGridData');
-          // // Bugfix : 갱신 후 undefined 행을 업애기 위해 gridData 길이를 체크 후 빈값 할당
+          // // Bugfix : 갱신 후 undefined 행을 제거하기 위해 gridData 길이를 체크 후 빈값 할당
           if( jqGrid.get(0).p.treeGrid) {
-            window.console.log('reloadTreeGrid : ', dataset);
+            var perfTime = new Date().getTime();
             jqGrid.get(0).addJSONData({
               rows : dataset
             });
+            console.log('addJSONData : ', new Date().getTime() - perfTime, 'ms');
           }
           else {
             jqGrid.jqGrid('setGridParam', {
@@ -90,6 +106,8 @@ angular.module('angular-jqgrid', []).directive('jqGrid', function() {
           //
           // jqGrid.trigger('reloadGrid');
 
+          console.log('onDatasetChanged : ', new Date().getTime() - startDataChanged, 'ms');
+
           return jqGrid.trigger('reload');
 
         } else {
@@ -99,7 +117,7 @@ angular.module('angular-jqgrid', []).directive('jqGrid', function() {
         }
       };
 
-      var unwatchDataset = scope.$watch('dataset', onDatasetChanged, true);
+      var unwatchDataset = scope.$watch('dataset', onDatasetChanged, false);
 
       /**
       * Tear Down
