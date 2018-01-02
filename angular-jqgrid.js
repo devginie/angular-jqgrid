@@ -47,7 +47,6 @@ angular.module('angular-jqgrid', []).directive('jqGrid', function() {
           // Exception process if dataset is empty.
           return gridObj;
         }
-
         var options = {};
 
         options.data = scope.dataset;
@@ -62,6 +61,10 @@ angular.module('angular-jqgrid', []).directive('jqGrid', function() {
           scope.callback(gridObj);
         }
 
+        // Make sure the initial width of the grid is the width of its parent.
+        var parentElement = angular.element(element).parent();
+        gridObj.setGridWidth(parentElement.width());
+
         return gridObj;
       };
 
@@ -73,51 +76,52 @@ angular.module('angular-jqgrid', []).directive('jqGrid', function() {
         var parentElement = angular.element(element).parent();
         jqGrid.setGridWidth(parentElement.width());
       });
+      
 
       /**
       * Watches
       */
       var onOptionsChanged = function() {
+        // console.log()
         jqGrid = init();
       };
 
       var unwatchOptions = scope.$watch('options', onOptionsChanged, true);
 
-      var onDatasetChanged = function(dataset) {
+      var onDatasetChanged = function() {
         var startDataChanged = new Date().getTime();
         if (jqGrid) {
-
-          jqGrid.jqGrid('clearGridData');
+          // This tree grid code breaks the standard JQgrid use case.
+          // Commented out for now.
+          // jqGrid.jqGrid('clearGridData');
           // // Bugfix : 갱신 후 undefined 행을 제거하기 위해 gridData 길이를 체크 후 빈값 할당
-          if( jqGrid.get(0).p.treeGrid) {
-            var perfTime = new Date().getTime();
-            jqGrid.get(0).addJSONData({
-              rows : dataset
-            });
-            console.log('addJSONData : ', new Date().getTime() - perfTime, 'ms');
-          }
-          else {
+          // if( jqGrid.get(0).p.treeGrid) {
+          //   var perfTime = new Date().getTime();
+          //   jqGrid.get(0).addJSONData({
+          //     rows : scope.dataset
+          //   });
+          //   console.log('addJSONData : ', new Date().getTime() - perfTime, 'ms');
+          // }
+          // else {
             jqGrid.jqGrid('setGridParam', {
               datatype: 'local',
-              data: dataset,
-              rowNum: dataset.length
+              data: scope.dataset,
+              rowNum: scope.dataset.length
             });
-          }
+          // }
           //
           // jqGrid.trigger('reloadGrid');
 
           console.log('onDatasetChanged : ', new Date().getTime() - startDataChanged, 'ms');
-
-          return jqGrid.trigger('reload');
-
+          
+          return jqGrid.trigger('reloadGrid');
         } else {
-
           jqGrid = init();
 
         }
       };
 
-      var unwatchDataset = scope.$watch('dataset', onDatasetChanged, false);
+      var unwatchDataset = scope.$watchCollection('dataset', onDatasetChanged, true);
 
       /**
       * Tear Down
